@@ -1,7 +1,9 @@
 package pagerank
 
+type Float float32;
+
 type Interface interface {
-  Rank(followingProb, tolerance float32, resultFunc func(label int, rank float32))
+  Rank(followingProb, tolerance Float, resultFunc func(label int, rank Float))
 }
 
 type pageRank struct {
@@ -15,6 +17,6 @@ func New() *pageRank {
 func (v *pageRank) Link(from, to int) {
 }
 
-func (v *pageRank) Rank(followingProb, tolerance float32, resultFunc func(label int, rank float32)) {
+func (v *pageRank) Rank(followingProb, tolerance Float, resultFunc func(label int, rank Float)) {
   resultFunc(1, 1.0)
 }
