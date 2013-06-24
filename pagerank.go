@@ -1,5 +1,8 @@
 package pagerank
 
+import "fmt"
+import "math"
+
 type Float float32;
 
 type Interface interface {
@@ -49,19 +52,13 @@ func (pr *pageRank) updateInLinks(fromAsIndex, toAsIndex int) {
 }
 
 func (pr *pageRank) updateNumberOutLinks(fromAsIndex int) {
-  setIntSlice(pr.numberOutLinks, fromAsIndex, func(oldValue int)int{
-    return oldValue + 1
-  })
-}
-
-func setIntSlice(slice []int, index int, valueFunc func(int)int) {
-  missingSlots := (index + 1) - cap(slice)
+  missingSlots := (fromAsIndex + 1) - cap(pr.numberOutLinks)
 
   if missingSlots > 0 {
-    slice = append(slice, make([]int, missingSlots)...)
+    pr.numberOutLinks = append(pr.numberOutLinks, make([]int, missingSlots)...)
   }
 
-  slice[index] = valueFunc(slice[index])
+  pr.numberOutLinks[fromAsIndex] += 1
 }
 
 func (pr *pageRank) linkWithIndices(fromAsIndex, toAsIndex int) {
@@ -76,6 +73,82 @@ func (pr *pageRank) Link(from, to int) {
   pr.linkWithIndices(fromAsIndex, toAsIndex)
 }
 
+func (pr *pageRank) calculateDanglingNodes() []int {
+  danglingNodes := make([]int, 0, len(pr.numberOutLinks))
+
+  for i := range pr.numberOutLinks {
+    if pr.numberOutLinks[i] == 0 {
+      danglingNodes = append(danglingNodes, i)
+    }
+  }
+
+  return danglingNodes
+}
+
+func (pr *pageRank) step(followingProb, tOverSize Float, p []Float, danglingNodes []int) []Float {
+  innerProduct := Float(0)
+
+  for i := range danglingNodes {
+    innerProduct += p[danglingNodes[i]]
+  }
+
+  innerProductOverSize := innerProduct / Float(len(p))
+  vsum := Float(0)
+  v := make([]Float, len(p))
+
+  for i := range pr.inLinks {
+    ksum := Float(0)
+    inLinksForI := pr.inLinks[i]
+
+    for j := range inLinksForI {
+      index := inLinksForI[j]
+      fmt.Println(p[index])
+      ksum += p[index] / Float(pr.numberOutLinks[index])
+    }
+
+    v[i] = followingProb * (ksum + innerProductOverSize) + tOverSize
+    vsum += v[i]
+  }
+
+  inverseOfSum := 1.0 / vsum
+
+  for i := range v {
+    v[i] *= inverseOfSum
+  }
+
+  return v
+}
+
+func calculateChange(p , new_p []Float) Float {
+  acc := Float(0)
+
+  for i := range p {
+    acc += Float(math.Abs(float64(p[i] - new_p[i])))
+  }
+
+  return acc
+}
+
 func (pr *pageRank) Rank(followingProb, tolerance Float, resultFunc func(label int, rank Float)) {
-  resultFunc(1, 1.0)
+  size := len(pr.keyToIndex)
+  inverseOfSize := 1.0 / Float(size)
+  tOverSize := (1.0 - followingProb) / Float(size)
+  danglingNodes := pr.calculateDanglingNodes()
+
+  p := make([]Float, size)
+  for i := range p {
+    p[i] = inverseOfSize
+  }
+
+  change := Float(2.0)
+
+  for change > tolerance {
+    new_p := pr.step(followingProb, tOverSize, p, danglingNodes)
+    change = calculateChange(p, new_p)
+    p = new_p
+  }
+
+  for i := range p {
+    resultFunc(pr.indexToKey[i], p[i])
+  }
 }

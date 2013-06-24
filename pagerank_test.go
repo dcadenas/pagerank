@@ -17,7 +17,7 @@ func (f Float) toPercentage() Float {
 func assertRank(t *testing.T, pageRank Interface, expected map[int]Float) {
   pageRank.Rank(0.85, 0.0001, func(label int, rank Float) {
     if Float(rank).toPercentage() != expected[label] {
-      t.Fail()
+      t.Error("Rank for", label, "should be", expected[label], "but was", Float(rank).toPercentage())
     }
   })
 }
