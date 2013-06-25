@@ -1,6 +1,5 @@
 package pagerank
 
-import "fmt"
 import "math"
 
 type Float float32;
@@ -18,13 +17,9 @@ type pageRank struct {
 }
 
 func New() *pageRank {
-  rg := new(pageRank)
-  rg.inLinks = [][]int{}
-  rg.numberOutLinks = []int{}
-  rg.currentAvailableIndex = -1
-  rg.keyToIndex = make(map[int]int)
-  rg.indexToKey = make(map[int]int)
-  return rg;
+  pr := new(pageRank)
+  pr.Clear()
+  return pr;
 }
 
 
@@ -42,7 +37,7 @@ func (pr *pageRank) keyAsArrayIndex(key int) int {
 }
 
 func (pr *pageRank) updateInLinks(fromAsIndex, toAsIndex int) {
-  missingSlots := (toAsIndex + 1) - cap(pr.inLinks)
+  missingSlots := len(pr.keyToIndex) - len(pr.inLinks)
 
   if missingSlots > 0 {
     pr.inLinks = append(pr.inLinks, make([][]int, missingSlots)...)
@@ -52,7 +47,8 @@ func (pr *pageRank) updateInLinks(fromAsIndex, toAsIndex int) {
 }
 
 func (pr *pageRank) updateNumberOutLinks(fromAsIndex int) {
-  missingSlots := (fromAsIndex + 1) - cap(pr.numberOutLinks)
+  missingSlots :=  len(pr.keyToIndex) - len(pr.numberOutLinks)
+
 
   if missingSlots > 0 {
     pr.numberOutLinks = append(pr.numberOutLinks, make([]int, missingSlots)...)
@@ -102,7 +98,6 @@ func (pr *pageRank) step(followingProb, tOverSize Float, p []Float, danglingNode
 
     for j := range inLinksForI {
       index := inLinksForI[j]
-      fmt.Println(p[index])
       ksum += p[index] / Float(pr.numberOutLinks[index])
     }
 
@@ -151,4 +146,12 @@ func (pr *pageRank) Rank(followingProb, tolerance Float, resultFunc func(label i
   for i := range p {
     resultFunc(pr.indexToKey[i], p[i])
   }
+}
+
+func (pr *pageRank) Clear() {
+  pr.inLinks = [][]int{}
+  pr.numberOutLinks = []int{}
+  pr.currentAvailableIndex = -1
+  pr.keyToIndex = make(map[int]int)
+  pr.indexToKey = make(map[int]int)
 }
