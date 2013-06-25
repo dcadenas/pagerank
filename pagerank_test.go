@@ -3,7 +3,10 @@ package pagerank
 import (
   "testing"
   "math"
+  "math/rand"
+  "fmt"
 )
+
 
 func (f Float) round() Float {
   return Float(math.Floor(float64(f) * 10 + 0.5) / 10)
@@ -196,4 +199,36 @@ func TestShouldCorrectlyReproduceTheWikipediaExample(t *testing.T) {
   }
 
   assertRank(t, pageRank, expectedRank)
+}
+
+func BenchmarkOneMillion(b *testing.B) {
+  n := 1000000
+
+  pageRank := New()
+
+  rand.Seed(5)
+
+  b.ResetTimer()
+  for i := 0; i < b.N; i++ {
+    for from := 0; from < n; from++ {
+      for j := 0; j < rand.Intn(60); j++ {
+        too := rand.Intn(n)
+
+        to := too
+        if too > 800000 {
+          to = rand.Intn(3)
+        }
+
+        pageRank.Link(from, to)
+      }
+    }
+  }
+
+  result := make([]Float, n)
+  pageRank.Rank(0.85, 0.001, func(key int, val Float){
+    result[key] = val
+  })
+
+  fmt.Println("5 first values are", result[0], ",", result[1], ",", result[2], ",", result[3], ",", result[4])
+  pageRank.Clear()
 }
