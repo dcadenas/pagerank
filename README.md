@@ -1,7 +1,8 @@
+[![Build Status](https://secure.travis-ci.org/dcadenas/pagerank.png?branch=master)](http://travis-ci.org/dcadenas/pagerank)
+[![endorse](http://api.coderwall.com/dcadenas/endorsecount.png)](http://coderwall.com/dcadenas)
+
 pagerank
 ========
-
-[![endorse](http://api.coderwall.com/dcadenas/endorsecount.png)](http://coderwall.com/dcadenas)
 
 A Go language [PageRank](http://en.wikipedia.org/wiki/PageRank) implementation.
 
