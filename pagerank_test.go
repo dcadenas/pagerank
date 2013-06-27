@@ -12,19 +12,22 @@ func init(){
   runtime.GOMAXPROCS(runtime.NumCPU())
 }
 
-func (f Float) round() Float {
-  return Float(math.Floor(float64(f) * 10 + 0.5) / 10)
+func round(f float64) float64 {
+  return math.Floor(f * 10 + 0.5) / 10
 }
 
-func (f Float) toPercentage() Float {
+func toPercentage(f float64) float64 {
   tenPow3 := math.Pow(10, 3)
-  return Float(100 * (float64(f) * tenPow3) / tenPow3).round()
+  return round(100 * (f * tenPow3) / tenPow3)
 }
 
-func assertRank(t *testing.T, pageRank Interface, expected map[int]Float) {
-  pageRank.Rank(0.85, 0.0001, func(label int, rank Float) {
-    if Float(rank).toPercentage() != expected[label] {
-      t.Error("Rank for", label, "should be", expected[label], "but was", Float(rank).toPercentage())
+
+func assertRank(t *testing.T, pageRank Interface, expected map[int]float64) {
+  pageRank.Rank(0.85, 0.0001, func(label int, rank float64) {
+    const tolerableFPError = 0.0001
+    rankAsPercentage := toPercentage(rank)
+    if math.Abs(rankAsPercentage - expected[label]) > tolerableFPError {
+      t.Error("Rank for", label, "should be", expected[label], "but was", rankAsPercentage)
     }
   })
 }
@@ -42,11 +45,11 @@ func assert(t *testing.T, actual bool) {
 }
 
 func TestRound(t *testing.T) {
-  assertEqual(t, Float(0.6666666).round(), Float(0.7))
+  assertEqual(t, round(0.6666666), 0.7)
 }
 
 func TestRankToPercentage(t *testing.T) {
-  assertEqual(t, Float(0.6666666).toPercentage(), Float(66.7))
+  assertEqual(t, toPercentage(0.6666666), 66.7)
 }
 
 func TestShouldEnterTheBlock(t *testing.T) {
@@ -54,7 +57,7 @@ func TestShouldEnterTheBlock(t *testing.T) {
   pageRank.Link(0, 1)
 
   entered := false
-  pageRank.Rank(0.85, 0.0001, func(_ int, _ Float) {
+  pageRank.Rank(0.85, 0.0001, func(_ int, _ float64) {
     entered = true
   })
 
@@ -64,9 +67,9 @@ func TestShouldEnterTheBlock(t *testing.T) {
 func TestShouldBePossibleToRecalculateTheRanksAfterANewLinkIsAdded(t *testing.T) {
   pageRank := New()
   pageRank.Link(0, 1)
-  assertRank(t, pageRank, map[int]Float{0: 35.1, 1: 64.9})
+  assertRank(t, pageRank, map[int]float64{0: 35.1, 1: 64.9})
   pageRank.Link(1, 2)
-  assertRank(t, pageRank, map[int]Float{0: 18.4, 1: 34.1, 2: 47.4})
+  assertRank(t, pageRank, map[int]float64{0: 18.4, 1: 34.1, 2: 47.4})
 }
 
 func TestShouldBePossibleToClearTheGraph(t *testing.T) {
@@ -75,12 +78,12 @@ func TestShouldBePossibleToClearTheGraph(t *testing.T) {
   pageRank.Link(1, 2)
   pageRank.Clear()
   pageRank.Link(0, 1)
-  assertRank(t, pageRank, map[int]Float{0: 35.1, 1: 64.9})
+  assertRank(t, pageRank, map[int]float64{0: 35.1, 1: 64.9})
 }
 
 func TestShouldNotFailWhenCalculatingTheRankOfAnEmptyGraph(t *testing.T) {
   pageRank := New()
-  pageRank.Rank(0.85, 0.0001, func(label int, rank Float) {
+  pageRank.Rank(0.85, 0.0001, func(label int, rank float64) {
     t.Error("This should not be seen")
   })
 }
@@ -91,7 +94,7 @@ func TestShouldReturnCorrectResultsWhenHavingADanglingNode(t *testing.T) {
   pageRank.Link(0, 2)
   pageRank.Link(1, 2)
 
-  expectedRank := map[int]Float{
+  expectedRank := map[int]float64{
     0: 21.3,
     1: 21.3,
     2: 57.4,
@@ -108,7 +111,7 @@ func TestShouldNotChangeTheGraphWhenAddingTheSameLinkManyTimes(t *testing.T) {
   pageRank.Link(1, 2)
   pageRank.Link(1, 2)
 
-  expectedRank := map[int]Float{
+  expectedRank := map[int]float64{
     0: 21.3,
     1: 21.3,
     2: 57.4,
@@ -123,7 +126,7 @@ func TestShouldReturnCorrectResultsForAStarGraph(t *testing.T) {
   pageRank.Link(1, 2)
   pageRank.Link(2, 2)
 
-  expectedRank := map[int]Float{
+  expectedRank := map[int]float64{
     0: 5,
     1: 5,
     2: 90,
@@ -140,7 +143,7 @@ func TestShouldBeUniformForACircularGraph(t *testing.T) {
   pageRank.Link(3, 4)
   pageRank.Link(4, 0)
 
-  expectedRank := map[int]Float{
+  expectedRank := map[int]float64{
     0: 20,
     1: 20,
     2: 20,
@@ -158,7 +161,7 @@ func TestShouldReturnCorrectResultsForAConvergingGraph(t *testing.T) {
   pageRank.Link(1, 2)
   pageRank.Link(2, 2)
 
-  expectedRank := map[int]Float{
+  expectedRank := map[int]float64{
     0: 5,
     1: 7.1,
     2: 87.9,
@@ -188,7 +191,7 @@ func TestShouldCorrectlyReproduceTheWikipediaExample(t *testing.T) {
   pageRank.Link(9, 4)
   pageRank.Link(10, 4)
 
-  expectedRank := map[int]Float{
+  expectedRank := map[int]float64{
     0: 3.3,  //a
     1: 38.4, //b
     2: 34.3, //c
@@ -228,8 +231,8 @@ func BenchmarkOneMillion(b *testing.B) {
     }
   }
 
-  result := make([]Float, n)
-  pageRank.Rank(0.85, 0.001, func(key int, val Float){
+  result := make([]float64, n)
+  pageRank.Rank(0.85, 0.001, func(key int, val float64){
     result[key] = val
   })
 

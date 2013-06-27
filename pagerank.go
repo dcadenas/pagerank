@@ -2,10 +2,8 @@ package pagerank
 
 import "math"
 
-type Float float32;
-
 type Interface interface {
-  Rank(followingProb, tolerance Float, resultFunc func(label int, rank Float))
+  Rank(followingProb, tolerance float64, resultFunc func(label int, rank float64))
   Link(from, to int)
 }
 
@@ -81,22 +79,22 @@ func (pr *pageRank) calculateDanglingNodes() []int {
   return danglingNodes
 }
 
-func (pr *pageRank) step(followingProb, tOverSize Float, p []Float, danglingNodes []int) []Float {
-  innerProduct := Float(0)
+func (pr *pageRank) step(followingProb, tOverSize float64, p []float64, danglingNodes []int) []float64 {
+  innerProduct := 0.0
 
   for _, danglingNode := range danglingNodes {
     innerProduct += p[danglingNode]
   }
 
-  innerProductOverSize := innerProduct / Float(len(p))
-  vsum := Float(0)
-  v := make([]Float, len(p))
+  innerProductOverSize := innerProduct / float64(len(p))
+  vsum := 0.0
+  v := make([]float64, len(p))
 
   for i, inLinksForI := range pr.inLinks {
-    ksum := Float(0)
+    ksum := 0.0
 
     for _, index := range inLinksForI {
-      ksum += p[index] / Float(pr.numberOutLinks[index])
+      ksum += p[index] / float64(pr.numberOutLinks[index])
     }
 
     v[i] = followingProb * (ksum + innerProductOverSize) + tOverSize
@@ -112,28 +110,28 @@ func (pr *pageRank) step(followingProb, tOverSize Float, p []Float, danglingNode
   return v
 }
 
-func calculateChange(p , new_p []Float) Float {
-  acc := Float(0)
+func calculateChange(p , new_p []float64) float64 {
+  acc := 0.0
 
   for i, pForI := range p {
-    acc += Float(math.Abs(float64(pForI - new_p[i])))
+    acc += math.Abs(pForI - new_p[i])
   }
 
   return acc
 }
 
-func (pr *pageRank) Rank(followingProb, tolerance Float, resultFunc func(label int, rank Float)) {
+func (pr *pageRank) Rank(followingProb, tolerance float64, resultFunc func(label int, rank float64)) {
   size := len(pr.keyToIndex)
-  inverseOfSize := 1.0 / Float(size)
-  tOverSize := (1.0 - followingProb) / Float(size)
+  inverseOfSize := 1.0 / float64(size)
+  tOverSize := (1.0 - followingProb) / float64(size)
   danglingNodes := pr.calculateDanglingNodes()
 
-  p := make([]Float, size)
+  p := make([]float64, size)
   for i := range p {
     p[i] = inverseOfSize
   }
 
-  change := Float(2.0)
+  change := 2.0
 
   for change > tolerance {
     new_p := pr.step(followingProb, tOverSize, p, danglingNodes)
