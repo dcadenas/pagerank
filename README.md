@@ -66,6 +66,6 @@ Note on Patches/Pull Requests
 Copyright
 ---------
 
-Author: Daniel Cadenas
+Author: [Daniel Cadenas](http://danielcadenas.com)
 
 Copyright (c) 2013. See [LICENSE](https://github.com/dcadenas/pagerank/blob/master/LICENSE) for details.
