@@ -10,9 +10,7 @@ A Go language [PageRank](http://en.wikipedia.org/wiki/PageRank) implementation.
 
 Description
 -----------
-
-A library to calculate the [PageRank](http://en.wikipedia.org/wiki/PageRank) of a big directed graph. It's intended to be used for big but not huge graphs, as 
-those are better processed with a map-reduce distributed solution.
+A library to calculate the [PageRank](http://en.wikipedia.org/wiki/PageRank) of a big directed graph. It's intended to be used for big but not huge graphs, as those are better processed with a map-reduce distributed solution.
 This is a port from ruby's [rankable_graph](http://github.com/dcadenas/rankable_graph) gem.
 
 Usage
@@ -68,6 +66,6 @@ Note on Patches/Pull Requests
 Copyright
 ---------
 
-Author: [Daniel Cadenas](http://danielcadenas.com)
+Author: Daniel Cadenas
 
-Copyright (c) 2013. See LICENSE for details.
+Copyright (c) 2013. See [LICENSE](https://github.com/dcadenas/pagerank/blob/master/LICENSE) for details.
