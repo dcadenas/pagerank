@@ -6,6 +6,7 @@ type Float float32;
 
 type Interface interface {
   Rank(followingProb, tolerance Float, resultFunc func(label int, rank Float))
+  Link(from, to int)
 }
 
 type pageRank struct {
