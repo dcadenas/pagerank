@@ -5,8 +5,12 @@ import (
   "math"
   "math/rand"
   "fmt"
+  "runtime"
 )
 
+func init(){
+  runtime.GOMAXPROCS(runtime.NumCPU())
+}
 
 func (f Float) round() Float {
   return Float(math.Floor(float64(f) * 10 + 0.5) / 10)
