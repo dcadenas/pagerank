@@ -22,10 +22,10 @@ func toPercentage(f float64) float64 {
 }
 
 func assertRank(t *testing.T, pageRank Interface, expected map[int]float64) {
-	pageRank.Rank(0.85, 0.0001, func(label int, rank float64) {
-		const tolerableFPError = 0.0001
+	const tolerance = 0.0001
+	pageRank.Rank(0.85, tolerance, func(label int, rank float64) {
 		rankAsPercentage := toPercentage(rank)
-		if math.Abs(rankAsPercentage-expected[label]) > tolerableFPError {
+		if math.Abs(rankAsPercentage - expected[label]) > tolerance {
 			t.Error("Rank for", label, "should be", expected[label], "but was", rankAsPercentage)
 		}
 	})
