@@ -1,6 +1,9 @@
 package pagerank
 
-import "math"
+import (
+  "math"
+  "github.com/dcadenas/asynctools"
+)
 
 type Interface interface {
 	Rank(followingProb, tolerance float64, resultFunc func(label int, rank float64))
@@ -86,24 +89,25 @@ func (pr *pageRank) step(followingProb, tOverSize float64, p []float64, dangling
 	}
 
 	innerProductOverSize := innerProduct / float64(len(p))
-	vsum := 0.0
-	v := make([]float64, len(p))
-
-	for i, inLinksForI := range pr.inLinks {
+  v := asynctools.MapIntMatrixToFloat64Vector(pr.inLinks, func(inLinksForI []int) float64 {
 		ksum := 0.0
 
-		for _, index := range inLinksForI {
+    for _, index := range inLinksForI {
 			ksum += p[index] / float64(pr.numberOutLinks[index])
 		}
 
-		v[i] = followingProb*(ksum+innerProductOverSize) + tOverSize
+		return followingProb*(ksum+innerProductOverSize) + tOverSize
+   })
+
+	vsum := 0.0
+	for i := range pr.inLinks {
 		vsum += v[i]
 	}
 
 	inverseOfSum := 1.0 / vsum
 
 	for i := range v {
-		v[i] *= inverseOfSum
+		v[i] = v[i] * inverseOfSum
 	}
 
 	return v
