@@ -217,7 +217,7 @@ func BenchmarkOneMillion(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for from := 0; from < n; from++ {
-			for j := 0; j < rand.Intn(60); j++ {
+			for j := 0; j < rand.Intn(400); j++ {
 				too := rand.Intn(n)
 
 				to := too
