@@ -1,0 +1,6 @@
+version: '2'
+services:
+  app:
+    build: .
+    volumes:
+      - .:/go/src/github.com/dcadenas/pagerank
