@@ -1,0 +1,8 @@
+steps:
+  - command: "go test"
+    label: "Test"
+
+  - block: "Cool?"
+
+  - command: "ls"
+    label: "Yay"
