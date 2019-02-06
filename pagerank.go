@@ -1,9 +1,15 @@
 package pagerank
 
-import "math"
+const ONE = int64(10000000)
+const DotONE = ONE / 10
+const Dot2ONE = ONE / 100
+const Dot3ONE = ONE / 1000
+const Dot4ONE = ONE / 10000
+const Dot6ONE = ONE / 1000000
+const Dot7ONE = ONE / 10000000
 
 type Interface interface {
-	Rank(followingProb, tolerance float64, resultFunc func(label string, rank float64))
+	Rank(followingProb, tolerance int64, resultFunc func(label string, rank int64))
 	Link(from, to string)
 }
 
@@ -66,10 +72,6 @@ func (pr *pageRank) Link(from, to string) {
 	pr.linkWithIndices(fromAsIndex, toAsIndex)
 }
 
-func (pr *pageRank) LinkStr(from, to string) {
-
-}
-
 func (pr *pageRank) calculateDanglingNodes() []int {
 	danglingNodes := make([]int, 0, len(pr.numberOutLinks))
 
@@ -82,59 +84,69 @@ func (pr *pageRank) calculateDanglingNodes() []int {
 	return danglingNodes
 }
 
-func (pr *pageRank) step(followingProb, tOverSize float64, p []float64, danglingNodes []int) []float64 {
-	innerProduct := 0.0
+func (pr *pageRank) step(followingProb, tOverSize int64, p []int64, danglingNodes []int) []int64 {
+	innerProduct := int64(0)
 
 	for _, danglingNode := range danglingNodes {
-		innerProduct += p[danglingNode]
+		innerProduct += int64(p[danglingNode])
 	}
 
-	innerProductOverSize := innerProduct / float64(len(p))
-	vsum := 0.0
-	v := make([]float64, len(p))
+	innerProductOverSize := innerProduct / int64(len(p))
+	vsum := int64(0)
+	v := make([]int64, len(p))
 
 	for i, inLinksForI := range pr.inLinks {
-		ksum := 0.0
+		ksum := int64(0)
 
 		for _, index := range inLinksForI {
-			ksum += p[index] / float64(pr.numberOutLinks[index])
+			ksum += p[index] / int64(pr.numberOutLinks[index])
 		}
 
-		v[i] = followingProb*(ksum+innerProductOverSize) + tOverSize
+		v[i] = followingProb*(ksum+innerProductOverSize)/ONE + tOverSize
 		vsum += v[i]
 	}
 
-	inverseOfSum := 1.0 / vsum
+	inverseOfSum := ONE * ONE / vsum
 
 	for i := range v {
-		v[i] *= inverseOfSum
+		v[i] = v[i] * inverseOfSum / ONE
 	}
 
 	return v
 }
 
-func calculateChange(p, new_p []float64) float64 {
-	acc := 0.0
+func Abs(a int64) int64 {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
+
+func calculateChange(p, new_p []int64) int64 {
+	acc := int64(0)
 
 	for i, pForI := range p {
-		acc += math.Abs(pForI - new_p[i])
+		acc += Abs(pForI - new_p[i])
 	}
 
 	return acc
 }
 
-func (pr *pageRank) Rank(followingProb, tolerance float64, resultFunc func(label string, rank float64)) {
+func (pr *pageRank) Rank(followingProb, tolerance int64, resultFunc func(label string, rank int64)) {
 	size := len(pr.keyToIndex)
-	inverseOfSize := 1.0 / float64(size)
-	tOverSize := (1.0 - followingProb) / float64(size)
+	if size == 0 {
+		return
+	}
+	inverseOfSize := ONE / int64(size)
+	tOverSize := (ONE - followingProb) / int64(size)
 	danglingNodes := pr.calculateDanglingNodes()
 
-	p := make([]float64, size)
+	p := make([]int64, size)
 	for i := range p {
 		p[i] = inverseOfSize
 	}
 
-	change := 2.0
+	change := 2 * ONE
 
 	for change > tolerance {
 		new_p := pr.step(followingProb, tOverSize, p, danglingNodes)

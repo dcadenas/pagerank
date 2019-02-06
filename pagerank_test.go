@@ -2,7 +2,6 @@ package pagerank
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	"runtime"
 	"strconv"
@@ -13,23 +12,23 @@ func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 }
 
-func round(f float64) float64 {
-	return math.Floor(f*10+0.5) / 10
-}
-
-func toPercentage(f float64) float64 {
-	tenPow3 := math.Pow(10, 3)
-	return round(100 * (f * tenPow3) / tenPow3)
-}
-
-func assertRank(t *testing.T, pageRank Interface, expected map[string]float64) {
-	const tolerance = 0.0001
-	pageRank.Rank(0.85, tolerance, func(label string, rank float64) {
+func assertRank(t *testing.T, pageRank Interface, expected map[string]int64) {
+	const tolerance = Dot4ONE
+	pageRank.Rank(85*Dot2ONE, tolerance, func(label string, rank int64) {
 		rankAsPercentage := toPercentage(rank)
-		if math.Abs(rankAsPercentage-expected[label]) > tolerance {
+		if Abs(rankAsPercentage-expected[label]) > tolerance {
 			t.Error("Rank for", label, "should be", expected[label], "but was", rankAsPercentage)
 		}
 	})
+}
+
+func round(f int64) int64 {
+	return (f*10 + 5*DotONE) / ONE * ONE / 10
+}
+
+func toPercentage(f int64) int64 {
+	tenPow3 := int64(1000)
+	return round(100 * f * tenPow3 / tenPow3)
 }
 
 func assertEqual(t *testing.T, actual, expected interface{}) {
@@ -45,11 +44,11 @@ func assert(t *testing.T, actual bool) {
 }
 
 func TestRound(t *testing.T) {
-	assertEqual(t, round(0.6666666), 0.7)
+	assertEqual(t, round(6666666*Dot7ONE), 7*DotONE)
 }
 
 func TestRankToPercentage(t *testing.T) {
-	assertEqual(t, toPercentage(0.6666666), 66.7)
+	assertEqual(t, toPercentage(6666666*Dot7ONE), 667*DotONE)
 }
 
 func TestShouldEnterTheBlock(t *testing.T) {
@@ -57,7 +56,7 @@ func TestShouldEnterTheBlock(t *testing.T) {
 	pageRank.Link("0", "1")
 
 	entered := false
-	pageRank.Rank(0.85, 0.0001, func(_ string, _ float64) {
+	pageRank.Rank(85*Dot2ONE, 1*Dot4ONE, func(_ string, _ int64) {
 		entered = true
 	})
 
@@ -67,9 +66,9 @@ func TestShouldEnterTheBlock(t *testing.T) {
 func TestShouldBePossibleToRecalculateTheRanksAfterANewLinkIsAdded(t *testing.T) {
 	pageRank := New()
 	pageRank.Link("0", "1")
-	assertRank(t, pageRank, map[string]float64{"0": 35.1, "1": 64.9})
+	assertRank(t, pageRank, map[string]int64{"0": 351 * DotONE, "1": 649 * DotONE})
 	pageRank.Link("1", "2")
-	assertRank(t, pageRank, map[string]float64{"0": 18.4, "1": 34.1, "2": 47.4})
+	assertRank(t, pageRank, map[string]int64{"0": 184 * DotONE, "1": 341 * DotONE, "2": 474 * DotONE})
 }
 
 func TestShouldBePossibleToClearTheGraph(t *testing.T) {
@@ -78,12 +77,12 @@ func TestShouldBePossibleToClearTheGraph(t *testing.T) {
 	pageRank.Link("1", "2")
 	pageRank.Clear()
 	pageRank.Link("0", "1")
-	assertRank(t, pageRank, map[string]float64{"0": 35.1, "1": 64.9})
+	assertRank(t, pageRank, map[string]int64{"0": 351 * DotONE, "1": 649 * DotONE})
 }
 
 func TestShouldNotFailWhenCalculatingTheRankOfAnEmptyGraph(t *testing.T) {
 	pageRank := New()
-	pageRank.Rank(0.85, 0.0001, func(label string, rank float64) {
+	pageRank.Rank(85*Dot2ONE, 00001*Dot4ONE, func(label string, rank int64) {
 		t.Error("This should not be seen")
 	})
 }
@@ -94,10 +93,10 @@ func TestShouldReturnCorrectResultsWhenHavingADanglingNode(t *testing.T) {
 	pageRank.Link("0", "2")
 	pageRank.Link("1", "2")
 
-	expectedRank := map[string]float64{
-		"0": 21.3,
-		"1": 21.3,
-		"2": 57.4,
+	expectedRank := map[string]int64{
+		"0": 213 * DotONE,
+		"1": 213 * DotONE,
+		"2": 574 * DotONE,
 	}
 
 	assertRank(t, pageRank, expectedRank)
@@ -111,10 +110,10 @@ func TestShouldNotChangeTheGraphWhenAddingTheSameLinkManyTimes(t *testing.T) {
 	pageRank.Link("1", "2")
 	pageRank.Link("1", "2")
 
-	expectedRank := map[string]float64{
-		"0": 21.3,
-		"1": 21.3,
-		"2": 57.4,
+	expectedRank := map[string]int64{
+		"0": 213 * DotONE,
+		"1": 213 * DotONE,
+		"2": 574 * DotONE,
 	}
 
 	assertRank(t, pageRank, expectedRank)
@@ -126,10 +125,10 @@ func TestShouldReturnCorrectResultsForAStarGraph(t *testing.T) {
 	pageRank.Link("1", "2")
 	pageRank.Link("2", "2")
 
-	expectedRank := map[string]float64{
-		"0": 5,
-		"1": 5,
-		"2": 90,
+	expectedRank := map[string]int64{
+		"0": 5 * ONE,
+		"1": 5 * ONE,
+		"2": 90 * ONE,
 	}
 
 	assertRank(t, pageRank, expectedRank)
@@ -143,12 +142,12 @@ func TestShouldBeUniformForACircularGraph(t *testing.T) {
 	pageRank.Link("3", "4")
 	pageRank.Link("4", "0")
 
-	expectedRank := map[string]float64{
-		"0": 20,
-		"1": 20,
-		"2": 20,
-		"3": 20,
-		"4": 20,
+	expectedRank := map[string]int64{
+		"0": 20 * ONE,
+		"1": 20 * ONE,
+		"2": 20 * ONE,
+		"3": 20 * ONE,
+		"4": 20 * ONE,
 	}
 
 	assertRank(t, pageRank, expectedRank)
@@ -161,10 +160,10 @@ func TestShouldReturnCorrectResultsForAConvergingGraph(t *testing.T) {
 	pageRank.Link("1", "2")
 	pageRank.Link("2", "2")
 
-	expectedRank := map[string]float64{
-		"0": 5,
-		"1": 7.1,
-		"2": 87.9,
+	expectedRank := map[string]int64{
+		"0": 5 * ONE,
+		"1": 71 * DotONE,
+		"2": 879 * DotONE,
 	}
 
 	assertRank(t, pageRank, expectedRank)
@@ -191,18 +190,18 @@ func TestShouldCorrectlyReproduceTheWikipediaExample(t *testing.T) {
 	pageRank.Link("9", "4")
 	pageRank.Link("10", "4")
 
-	expectedRank := map[string]float64{
-		"0":  3.3,  //a
-		"1":  38.4, //b
-		"2":  34.3, //c
-		"3":  3.9,  //d
-		"4":  8.1,  //e
-		"5":  3.9,  //f
-		"6":  1.6,  //g
-		"7":  1.6,  //h
-		"8":  1.6,  //i
-		"9":  1.6,  //j
-		"10": 1.6,  //k
+	expectedRank := map[string]int64{
+		"0":  33 * DotONE,  //a
+		"1":  384 * DotONE, //b
+		"2":  343 * DotONE, //c
+		"3":  39 * DotONE,  //d
+		"4":  81 * DotONE,  //e
+		"5":  39 * DotONE,  //f
+		"6":  16 * DotONE,  //g
+		"7":  16 * DotONE,  //h
+		"8":  16 * DotONE,  //i
+		"9":  16 * DotONE,  //j
+		"10": 16 * DotONE,  //k
 	}
 
 	assertRank(t, pageRank, expectedRank)
@@ -231,8 +230,8 @@ func BenchmarkOneMillion(b *testing.B) {
 		}
 	}
 
-	result := make(map[string]float64, n)
-	pageRank.Rank(0.85, 0.001, func(key string, val float64) {
+	result := make(map[string]int64, n)
+	pageRank.Rank(85*Dot2ONE, 0001*Dot3ONE, func(key string, val int64) {
 		result[key] = val
 	})
 
