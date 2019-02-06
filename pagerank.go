@@ -3,16 +3,16 @@ package pagerank
 import "math"
 
 type Interface interface {
-	Rank(followingProb, tolerance float64, resultFunc func(label int, rank float64))
-	Link(from, to int)
+	Rank(followingProb, tolerance float64, resultFunc func(label string, rank float64))
+	Link(from, to string)
 }
 
 type pageRank struct {
 	inLinks               [][]int
 	numberOutLinks        []int
 	currentAvailableIndex int
-	keyToIndex            map[int]int
-	indexToKey            map[int]int
+	keyToIndex            map[string]int
+	indexToKey            map[int]string
 }
 
 func New() *pageRank {
@@ -21,7 +21,7 @@ func New() *pageRank {
 	return pr
 }
 
-func (pr *pageRank) keyAsArrayIndex(key int) int {
+func (pr *pageRank) keyAsArrayIndex(key string) int {
 	index, ok := pr.keyToIndex[key]
 
 	if !ok {
@@ -59,11 +59,15 @@ func (pr *pageRank) linkWithIndices(fromAsIndex, toAsIndex int) {
 	pr.updateNumberOutLinks(fromAsIndex)
 }
 
-func (pr *pageRank) Link(from, to int) {
+func (pr *pageRank) Link(from, to string) {
 	fromAsIndex := pr.keyAsArrayIndex(from)
 	toAsIndex := pr.keyAsArrayIndex(to)
 
 	pr.linkWithIndices(fromAsIndex, toAsIndex)
+}
+
+func (pr *pageRank) LinkStr(from, to string) {
+
 }
 
 func (pr *pageRank) calculateDanglingNodes() []int {
@@ -119,7 +123,7 @@ func calculateChange(p, new_p []float64) float64 {
 	return acc
 }
 
-func (pr *pageRank) Rank(followingProb, tolerance float64, resultFunc func(label int, rank float64)) {
+func (pr *pageRank) Rank(followingProb, tolerance float64, resultFunc func(label string, rank float64)) {
 	size := len(pr.keyToIndex)
 	inverseOfSize := 1.0 / float64(size)
 	tOverSize := (1.0 - followingProb) / float64(size)
@@ -147,6 +151,6 @@ func (pr *pageRank) Clear() {
 	pr.inLinks = [][]int{}
 	pr.numberOutLinks = []int{}
 	pr.currentAvailableIndex = -1
-	pr.keyToIndex = make(map[int]int)
-	pr.indexToKey = make(map[int]int)
+	pr.keyToIndex = make(map[string]int)
+	pr.indexToKey = make(map[int]string)
 }
