@@ -5,7 +5,6 @@ const DotONE = ONE / 10
 const Dot2ONE = ONE / 100
 const Dot3ONE = ONE / 1000
 const Dot4ONE = ONE / 10000
-const Dot6ONE = ONE / 1000000
 const Dot7ONE = ONE / 10000000
 
 type Interface interface {
