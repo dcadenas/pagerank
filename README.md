@@ -1,4 +1,5 @@
 ![CI](https://github.com/dcadenas/pagerank/actions/workflows/go.yml/badge.svg)
+[![codecov](https://codecov.io/gh/dcadenas/pagerank/graph/badge.svg?token=2N3B1RMAAP)](https://codecov.io/gh/dcadenas/pagerank)
 
 pagerank
 ========
