@@ -1,3 +1,5 @@
+![CI](https://github.com/dcadenas/pagerank/actions/workflows/go.yml/badge.svg)
+
 pagerank
 ========
 
