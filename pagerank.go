@@ -25,8 +25,8 @@ func (pr *pageRank) keyAsArrayIndex(key int) int {
 	index, ok := pr.keyToIndex[key]
 
 	if !ok {
-		pr.currentAvailableIndex++
 		index = pr.currentAvailableIndex
+		pr.currentAvailableIndex++
 		pr.keyToIndex[key] = index
 		pr.indexToKey[index] = key
 	}
@@ -146,7 +146,7 @@ func (pr *pageRank) Rank(followingProb, tolerance float64, resultFunc func(label
 func (pr *pageRank) Clear() {
 	pr.inLinks = [][]int{}
 	pr.numberOutLinks = []int{}
-	pr.currentAvailableIndex = -1
+	pr.currentAvailableIndex = 0
 	pr.keyToIndex = make(map[int]int)
 	pr.indexToKey = make(map[int]int)
 }

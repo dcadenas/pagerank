@@ -25,7 +25,7 @@ func assertRank(t *testing.T, pageRank Interface, expected map[int]float64) {
 	const tolerance = 0.0001
 	pageRank.Rank(0.85, tolerance, func(label int, rank float64) {
 		rankAsPercentage := toPercentage(rank)
-		if math.Abs(rankAsPercentage - expected[label]) > tolerance {
+		if math.Abs(rankAsPercentage-expected[label]) > tolerance {
 			t.Error("Rank for", label, "should be", expected[label], "but was", rankAsPercentage)
 		}
 	})
@@ -235,6 +235,6 @@ func BenchmarkOneMillion(b *testing.B) {
 		result[key] = val
 	})
 
-	fmt.Println("5 first values are", result[0], ",", result[1], ",", result[2], ",", result[3], ",", result[4])
+	fmt.Println("5 first values are", result[0], ",", result[1], ",", result[2], ",", result[3], ",", result[4], " Size:", len(result))
 	pageRank.Clear()
 }
