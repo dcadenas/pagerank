@@ -1,6 +1,9 @@
 package pagerank
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 type Interface interface {
 	Rank(followingProb, tolerance float64, resultFunc func(label int, rank float64))
@@ -19,6 +22,22 @@ func New() *pageRank {
 	pr := new(pageRank)
 	pr.Clear()
 	return pr
+}
+
+func (pr *pageRank) String() string {
+	return fmt.Sprintf(
+		"PageRank Struct:\n"+
+			"InLinks: %v\n"+
+			"NumberOutLinks: %v\n"+
+			"CurrentAvailableIndex: %d\n"+
+			"KeyToIndex: %v\n"+
+			"IndexToKey: %v",
+		pr.inLinks,
+		pr.numberOutLinks,
+		pr.currentAvailableIndex,
+		pr.keyToIndex,
+		pr.indexToKey,
+	)
 }
 
 func (pr *pageRank) keyAsArrayIndex(key int) int {

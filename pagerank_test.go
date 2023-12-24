@@ -207,12 +207,10 @@ func TestShouldCorrectlyReproduceTheWikipediaExample(t *testing.T) {
 	assertRank(t, pageRank, expectedRank)
 }
 
-func BenchmarkOneMillion(b *testing.B) {
-	n := 1000000
+func BenchmarkOneHundredThousand(b *testing.B) {
+	n := 100_000
 
 	pageRank := New()
-
-	rand.Seed(5)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -221,7 +219,7 @@ func BenchmarkOneMillion(b *testing.B) {
 				too := rand.Intn(n)
 
 				to := too
-				if too > 800000 {
+				if too > 80000 {
 					to = rand.Intn(3)
 				}
 
